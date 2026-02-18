@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodePen Feed Demo<</title>
+    <style>
+        body { font-family: system-ui, sans-serif; padding: 20px; background: #f4f4f9; }
+        .pen-card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        a { color: #007bff; text-decoration: none; font-weight: bold; }
+        .loading { color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <h1>Pens by Jose Pereda</h1>
+    <div id="output" class="loading">Fetching latest pens...</div>
+
+    <script>
+        const username = 'joselpereda';
+        // Using rss2json as a middleman to handle CORS and XML parsing
+        const apiURL = `https://api.rss2json.com/v1/api.json?rss_url=https://codepen.io/${username}/public/feed/`;
+
+        async function fetchPens() {
+            try {
+                const response = await fetch(apiURL);
+                const data = await response.json();
+                const output = document.getElementById('output');
+                
+                if (data.status === 'ok') {
+                    output.innerHTML = ''; // Clear loading text
+                    output.classList.remove('loading');
+
+                    data.items.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'pen-card';
+                        card.innerHTML = `
+                            <h3>${item.title}</h3>
+                            <p>${item.description}</p>
+                            <a href="${item.link}" target="_blank">View on CodePen →</a>
+                        `;
+                        output.appendChild(card);
+                    });
+                } else {
+                    output.innerText = "Failed to load Pens.";
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                document.getElementById('output').innerText = "Error: Could not connect to the feed.";
+            }
+        }
+
+        fetchPens();
+    </script>
+</body>
+</html>
